@@ -94,6 +94,10 @@ public class JNotepadPP extends JFrame {
         saveAsDocument.addActionListener(e -> handleSaveAs());
         fileMenu.add(saveAsDocument);
 
+        JMenuItem statistics = new JMenuItem("Statistics");
+        statistics.addActionListener(e -> handleStats());
+        fileMenu.add(statistics);
+
         JMenuItem closeDocument = new JMenuItem("Close");
         closeDocument.addActionListener(e -> handleClose());
         fileMenu.add(closeDocument);
@@ -195,6 +199,23 @@ public class JNotepadPP extends JFrame {
         if (textArea != null) {
             textArea.paste();
         }
+    }
+
+    private void handleStats() {
+        JTextArea textArea = getCurrentTextArea();
+        if (textArea != null) {
+            String text = textArea.getText();
+            int numOfChars = text.length();
+            int numOfNonBlankChars = text.replaceAll("\\s+", "").length();
+            int numOfLines = textArea.getLineCount();
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Your document has " + numOfChars + " characters, " + numOfNonBlankChars + " non-blank characters and " + numOfLines + " lines.",
+                    "Statistics",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        	}
     }
 
     private JTextArea getCurrentTextArea() {
