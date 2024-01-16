@@ -7,6 +7,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 
 /**
  * App must be executable from here
@@ -86,9 +87,7 @@ public class JNotepadPP extends JFrame {
         fileMenu.add(openDocument);
 
         JMenuItem saveDocument = new JMenuItem("Save");
-        saveDocument.addActionListener(e -> {
-
-        });
+        saveDocument.addActionListener(e -> handleSave());
         fileMenu.add(saveDocument);
 
         JMenuItem saveAsDocument = new JMenuItem("Save As...");
@@ -151,6 +150,52 @@ public class JNotepadPP extends JFrame {
             var currentModel = multipleDocumentModel.loadDocument(selectedFile.toPath());
             addIconListener(currentModel);
             updateTabIcon(currentModel);
+            setFocus(currentModel);
+        }
+    }
+
+    private void handleSave() {
+        SingleDocumentModel currentDoc = multipleDocumentModel.getCurrentDocument();
+        if (currentDoc == null) {
+            return;
+        }
+        Path newFilePath = currentDoc.getFilePath();
+        String newName = "";
+        if (currentDoc.getFilePath() == null) {
+
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+            fileChooser.setDialogTitle("Save file");
+            int result = fileChooser.showSaveDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                newName = selectedFile.getName();
+                newFilePath = selectedFile.toPath();
+            } else {
+                return;
+            }
+        }
+        try {
+            multipleDocumentModel.saveDocument(currentDoc, newFilePath);
+            currentDoc.setFilePath(newFilePath);
+            updateTabIcon(currentDoc);
+            updateTabName(newName, currentDoc);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Error while saving file: " + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+
+    private void updateTabName(String newName, SingleDocumentModel currentDoc) {
+        if (newName != null && !newName.isBlank()) {
+            ((DefaultMultipleDocumentModel) multipleDocumentModel).setTitleAt(
+                    multipleDocumentModel.getIndexOfDocument(currentDoc),
+                    newName
+            );
         }
     }
 
@@ -158,6 +203,10 @@ public class JNotepadPP extends JFrame {
         SingleDocumentModel currentDoc = multipleDocumentModel.createNewDocument();
         updateTabIcon(currentDoc);
         addIconListener(currentDoc);
+        setFocus(currentDoc);
+    }
+
+    private void setFocus(SingleDocumentModel currentDoc) {
         int index = multipleDocumentModel.getIndexOfDocument(currentDoc);
         ((DefaultMultipleDocumentModel) multipleDocumentModel).setSelectedIndex(index);
     }
