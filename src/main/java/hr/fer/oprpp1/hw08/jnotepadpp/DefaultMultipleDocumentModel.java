@@ -1,7 +1,6 @@
 package hr.fer.oprpp1.hw08.jnotepadpp;
 
 import javax.swing.*;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -71,7 +70,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
 
     @Override
     public void saveDocument(SingleDocumentModel model, Path newPath) {
-        if (newPath != null && findForPath(newPath) != null) {
+        if (newPath != model.getFilePath() && newPath != null && Files.exists(newPath)) {
             throw new IllegalArgumentException("Document with the given path already exists.");
         }
         Path path = newPath != null ? newPath : model.getFilePath();
