@@ -95,9 +95,7 @@ public class JNotepadPP extends JFrame {
         fileMenu.add(saveAsDocument);
 
         JMenuItem closeDocument = new JMenuItem("Close");
-        closeDocument.addActionListener(e -> {
-
-        });
+        closeDocument.addActionListener(e -> handleClose());
         fileMenu.add(closeDocument);
 
         JMenu editMenu = new JMenu("Edit");
@@ -173,6 +171,15 @@ public class JNotepadPP extends JFrame {
         if (newFilePath == null) return;
 
         saveDocument(currentDoc, newFilePath);
+    }
+
+    private void handleClose() {
+        SingleDocumentModel currentDoc = getCurrentDocument();
+        if (currentDoc == null) return;
+
+        if (checkForUnsavedChanges()) {
+            multipleDocumentModel.closeDocument(currentDoc);
+        }
     }
 
 
@@ -270,7 +277,7 @@ public class JNotepadPP extends JFrame {
             );
 
             if (result == JOptionPane.YES_OPTION) {
-                // Implement saving the current document
+                handleSave();
                 return true; // Proceed after saving
             } else if (result == JOptionPane.NO_OPTION) {
                 return true; // Proceed without saving
