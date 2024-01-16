@@ -102,21 +102,15 @@ public class JNotepadPP extends JFrame {
         menuBar.add(editMenu);
 
         JMenuItem cutText = new JMenuItem("Cut");
-        cutText.addActionListener(e -> {
-
-        });
+        cutText.addActionListener(e -> handleCut());
         editMenu.add(cutText);
 
         JMenuItem copyText = new JMenuItem("Copy");
-        copyText.addActionListener(e -> {
-
-        });
+        copyText.addActionListener(e -> handleCopy());
         editMenu.add(copyText);
 
         JMenuItem pasteText = new JMenuItem("Paste");
-        pasteText.addActionListener(e -> {
-
-        });
+        pasteText.addActionListener(e -> handlePaste());
         editMenu.add(pasteText);
 
         JMenu helpMenu = new JMenu("Help");
@@ -180,6 +174,34 @@ public class JNotepadPP extends JFrame {
         if (checkForUnsavedChanges()) {
             multipleDocumentModel.closeDocument(currentDoc);
         }
+    }
+
+    private void handleCut() {
+        JTextArea textArea = getCurrentTextArea();
+        if (textArea != null) {
+            textArea.cut();
+        }
+    }
+
+    private void handleCopy() {
+        JTextArea textArea = getCurrentTextArea();
+        if (textArea != null) {
+            textArea.copy();
+        }
+    }
+
+    private void handlePaste() {
+        JTextArea textArea = getCurrentTextArea();
+        if (textArea != null) {
+            textArea.paste();
+        }
+    }
+
+    private JTextArea getCurrentTextArea() {
+        SingleDocumentModel currentDoc = getCurrentDocument();
+        if (currentDoc == null) return null;
+
+        return currentDoc.getTextComponent();
     }
 
 
