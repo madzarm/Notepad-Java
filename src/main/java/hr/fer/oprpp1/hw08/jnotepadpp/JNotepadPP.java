@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -81,9 +82,7 @@ public class JNotepadPP extends JFrame {
         fileMenu.add(newDocument);
 
         JMenuItem openDocument = new JMenuItem("Open");
-        openDocument.addActionListener(e -> {
-
-        });
+        openDocument.addActionListener(e -> handleOpen());
         fileMenu.add(openDocument);
 
         JMenuItem saveDocument = new JMenuItem("Save");
@@ -140,6 +139,19 @@ public class JNotepadPP extends JFrame {
     private void handleNew() {
         createDocumentAndSetFocus();
         updateWindowTitle();
+    }
+
+    private void handleOpen() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        fileChooser.setDialogTitle("Open file");
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            var currentModel = multipleDocumentModel.loadDocument(selectedFile.toPath());
+            addIconListener(currentModel);
+            updateTabIcon(currentModel);
+        }
     }
 
     private void createDocumentAndSetFocus() {
