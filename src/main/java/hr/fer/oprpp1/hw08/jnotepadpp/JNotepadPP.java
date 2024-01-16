@@ -91,9 +91,7 @@ public class JNotepadPP extends JFrame {
         fileMenu.add(saveDocument);
 
         JMenuItem saveAsDocument = new JMenuItem("Save As...");
-        saveAsDocument.addActionListener(e -> {
-
-        });
+        saveAsDocument.addActionListener(e -> handleSaveAs());
         fileMenu.add(saveAsDocument);
 
         JMenuItem closeDocument = new JMenuItem("Close");
@@ -155,31 +153,50 @@ public class JNotepadPP extends JFrame {
     }
 
     private void handleSave() {
-        SingleDocumentModel currentDoc = multipleDocumentModel.getCurrentDocument();
-        if (currentDoc == null) {
-            return;
-        }
-        Path newFilePath = currentDoc.getFilePath();
-        String newName = "";
-        if (currentDoc.getFilePath() == null) {
+        SingleDocumentModel currentDoc = getCurrentDocument();
+        if (currentDoc == null) return;
 
-            JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-            fileChooser.setDialogTitle("Save file");
-            int result = fileChooser.showSaveDialog(this);
-            if (result == JFileChooser.APPROVE_OPTION) {
-                File selectedFile = fileChooser.getSelectedFile();
-                newName = selectedFile.getName();
-                newFilePath = selectedFile.toPath();
-            } else {
-                return;
-            }
+        Path newFilePath = currentDoc.getFilePath();
+        if (newFilePath == null) {
+            newFilePath = chooseFilePath();
+            if (newFilePath == null) return;
         }
+
+        saveDocument(currentDoc, newFilePath);
+    }
+
+    private void handleSaveAs() {
+        SingleDocumentModel currentDoc = getCurrentDocument();
+        if (currentDoc == null) return;
+
+        Path newFilePath = chooseFilePath();
+        if (newFilePath == null) return;
+
+        saveDocument(currentDoc, newFilePath);
+    }
+
+
+
+    private Path chooseFilePath() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+        fileChooser.setDialogTitle("Save file");
+        int result = fileChooser.showSaveDialog(this);
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            return selectedFile.toPath();
+        } else {
+            return null;
+        }
+    }
+
+    private void saveDocument(SingleDocumentModel doc, Path filePath) {
         try {
-            multipleDocumentModel.saveDocument(currentDoc, newFilePath);
-            currentDoc.setFilePath(newFilePath);
-            updateTabIcon(currentDoc);
-            updateTabName(newName, currentDoc);
+            multipleDocumentModel.saveDocument(doc, filePath);
+            doc.setFilePath(filePath);
+            updateTabIcon(doc);
+            updateTabName(String.valueOf(filePath.getFileName()), doc);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(
                     this,
@@ -235,7 +252,7 @@ public class JNotepadPP extends JFrame {
     }
 
     private void updateWindowTitle() {
-        SingleDocumentModel currentDoc = multipleDocumentModel.getCurrentDocument();
+        SingleDocumentModel currentDoc = getCurrentDocument();
         String title = currentDoc != null && currentDoc.getFilePath() != null
                 ? currentDoc.getFilePath().toString()
                 : "unnamed";
@@ -243,7 +260,7 @@ public class JNotepadPP extends JFrame {
     }
 
     private boolean checkForUnsavedChanges() {
-        if (multipleDocumentModel.getCurrentDocument() != null && multipleDocumentModel.getCurrentDocument().isModified()) {
+        if (getCurrentDocument() != null && getCurrentDocument().isModified()) {
             int result = JOptionPane.showConfirmDialog(
                     this,
                     "The current document has unsaved changes. Do you want to save them?",
@@ -270,6 +287,9 @@ public class JNotepadPP extends JFrame {
         return new ImageIcon(resizedImage);
     }
 
+    private SingleDocumentModel getCurrentDocument() {
+        return multipleDocumentModel.getCurrentDocument();
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
