@@ -1,7 +1,9 @@
 package hr.fer.oprpp1.hw08.jnotepadpp;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -10,11 +12,15 @@ import java.util.List;
 
 public class DefaultMultipleDocumentModel extends JTabbedPane implements MultipleDocumentModel {
 
-    private List<SingleDocumentModel> documentModels = new ArrayList<>();
+    private final List<SingleDocumentModel> documentModels = new ArrayList<>();
     private SingleDocumentModel currentDocument;
-    private List<MultipleDocumentListener> multipleDocumentListeners = new ArrayList<>();
+    private final List<MultipleDocumentListener> multipleDocumentListeners = new ArrayList<>();
+    private ImageIcon unmodifiedIcon;
+    private ImageIcon modifiedIcon;
 
     public DefaultMultipleDocumentModel() {
+        unmodifiedIcon = resizeIcon(loadIcon("green-diskette.png"), 16, 16);
+        modifiedIcon = resizeIcon(loadIcon("red-diskette.png"), 16, 16);
         this.addChangeListener(e -> {
             int selectedIndex = this.getSelectedIndex();
             if (selectedIndex != -1) {
@@ -22,6 +28,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
             }
         });
     }
+
 
     @Override
     public JComponent getVisualComponent() {
@@ -34,6 +41,8 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
         documentModels.add(newDoc);
         addTab("untitled", new JScrollPane(newDoc.getTextComponent()));
         setCurrentDocument(newDoc);
+        addListeners(newDoc);
+        notifyDocumentAdded(newDoc);
         return newDoc;
     }
 
@@ -60,11 +69,12 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
         } catch (Exception e) {
             e.printStackTrace();
         }
-                SingleDocumentModel newDoc = new DefaultSingleDocumentModel(path, content);
+        SingleDocumentModel newDoc = new DefaultSingleDocumentModel(path, content);
         documentModels.add(newDoc);
         addTab(path.getFileName().toString(), new JScrollPane(newDoc.getTextComponent()));
+        addListeners(newDoc);
+        notifyDocumentAdded(newDoc);
         setCurrentDocument(newDoc);
-        // Add any necessary listeners to newDoc
         return newDoc;
     }
 
@@ -95,7 +105,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
             documentModels.remove(index);
             if (currentDocument == model) {
                 currentDocument = documentModels.isEmpty() ? null : documentModels.get(0);
-                // Notify listeners about the change if necessary
+                notifyDocumentRemoved(model);
             }
         }
     }
@@ -140,7 +150,88 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
         return documentModels.iterator();
     }
 
+    private void addListeners(SingleDocumentModel newDoc) {
+        newDoc.addSingleDocumentListener(new SingleDocumentListener() {
+            @Override
+            public void documentModifyStatusUpdated(SingleDocumentModel model) {
+                updateTabIcon(model);
+                updateTabTitleAndTooltip(model, model.getFilePath() != null ? model.getFilePath().getFileName().toString() : "(unnamed)");
+            }
+
+            @Override
+            public void documentFilePathUpdated(SingleDocumentModel model) {
+                updateTabIcon(model);
+                updateTabTitleAndTooltip(model, model.getFilePath() != null ? model.getFilePath().getFileName().toString() : "(unnamed)");
+            }
+        });
+    }
+
     public void setCurrentDocument(SingleDocumentModel currentDocument) {
         this.currentDocument = currentDocument;
     }
+
+    // Implement the listener methods
+    private void notifyDocumentAdded(SingleDocumentModel model) {
+        for (MultipleDocumentListener listener : multipleDocumentListeners) {
+            listener.documentAdded(model);
+        }
+        addListeners(model);
+    }
+
+    private void notifyDocumentRemoved(SingleDocumentModel model) {
+        for (MultipleDocumentListener listener : multipleDocumentListeners) {
+            listener.documentRemoved(model);
+        }
+    }
+
+    private void notifyPathChanged(SingleDocumentModel model) {
+        for (MultipleDocumentListener listener : multipleDocumentListeners) {
+            listener.currentDocumentChanged(model, model);
+        }
+
+    }
+
+    private void updateTabTitleAndTooltip(SingleDocumentModel doc, String title) {
+        int index = getIndexOfDocument(doc);
+        setTitleAt(index, title);
+        String tooltip = doc.getFilePath() != null ? doc.getFilePath().toString() : "unnamed";
+        setToolTipTextAt(index, tooltip);
+    }
+
+    private void updateTabIcon(SingleDocumentModel model) {
+        int index =getIndexOfDocument(model);
+        if (model.isModified()) {
+            setIconAt(index, modifiedIcon);
+        } else {
+            setIconAt(index, unmodifiedIcon);
+        }
+    }
+
+    private ImageIcon loadIcon(String iconName) {
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream(iconName);
+        if (is == null) {
+            throw new RuntimeException("Icon file not found: " + iconName);
+        }
+        try {
+            byte[] bytes = is.readAllBytes();
+            return new ImageIcon(bytes);
+        } catch (IOException ex) {
+            throw new RuntimeException("Error reading icon file: " + iconName, ex);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+
+    private ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
+        Image img = icon.getImage();
+        Image resizedImage = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(resizedImage);
+    }
+
+
 }

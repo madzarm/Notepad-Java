@@ -23,19 +23,19 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel{
             @Override
             public void insertUpdate(DocumentEvent e) {
                 modified = true;
-                notifyListeners();
+                notifyModifyStatusChanged();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
                 modified = true;
-                notifyListeners();
+                notifyModifyStatusChanged();
             }
 
             @Override
             public void changedUpdate(DocumentEvent e) {
                 modified = true;
-                notifyListeners();
+                notifyModifyStatusChanged();
             }
         });
     }
@@ -53,6 +53,7 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel{
     @Override
     public void setFilePath(Path path) {
         this.filePath = path;
+        notifyPathUpdated();
     }
 
     @Override
@@ -64,7 +65,7 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel{
     public void setModified(boolean modified) {
         if (this.modified != modified) {
             this.modified = modified;
-            notifyListeners();
+            notifyModifyStatusChanged();
         }
     }
 
@@ -78,8 +79,13 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel{
         listeners.remove(l);
     }
 
-    private void notifyListeners() {
+    private void notifyModifyStatusChanged() {
         listeners.forEach(listener ->
                 listener.documentModifyStatusUpdated(DefaultSingleDocumentModel.this));
+    }
+
+    private void notifyPathUpdated() {
+        listeners.forEach(listener ->
+                listener.documentFilePathUpdated(DefaultSingleDocumentModel.this));
     }
 }
