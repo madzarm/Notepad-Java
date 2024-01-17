@@ -6,10 +6,11 @@ import java.awt.*;
 public class StatusBar extends JPanel {
     private static StatusBar instance = null;
     private JLabel statusLabel;
+    private JTextArea currentTextArea;
 
     private StatusBar() {
         super(new BorderLayout());
-        statusLabel = new JLabel("Ready");
+        statusLabel = new JLabel("length: " + 0 + " lines: " + 0 + " column: " + 0);
         this.add(statusLabel, BorderLayout.WEST);
     }
 
@@ -37,5 +38,20 @@ public class StatusBar extends JPanel {
         } catch (Exception ignored) {
         }
         updateStatus("length: " + length + " lines: " + lines + " column: " + column);
+    }
+
+    public void attachToTextArea(JTextArea area) {
+        detachCurrentTextArea();
+        currentTextArea = area;
+        if (area != null) {
+            area.addCaretListener(e -> updateStatusBar(area));
+            updateStatusBar(area);
+        }
+    }
+
+    private void detachCurrentTextArea() {
+        if (currentTextArea != null) {
+            currentTextArea.removeCaretListener(e -> updateStatusBar(currentTextArea));
+        }
     }
 }

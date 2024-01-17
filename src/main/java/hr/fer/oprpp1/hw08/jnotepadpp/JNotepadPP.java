@@ -305,7 +305,7 @@ public class JNotepadPP extends JFrame {
 
     private void updateStatusBar() {
         JTextArea textArea = getCurrentTextArea();
-        StatusBar.getInstance().updateStatusBar(textArea);
+        StatusBar.getInstance().attachToTextArea(textArea);
     }
 
     private void updateWindowTitle() {
