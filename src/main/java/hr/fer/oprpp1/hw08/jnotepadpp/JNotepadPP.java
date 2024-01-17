@@ -21,8 +21,6 @@ public class JNotepadPP extends JFrame {
         initGui();
     }
 
-
-
     private void initGui() {
         multipleDocumentModel = new DefaultMultipleDocumentModel();
         getContentPane().add(multipleDocumentModel.getVisualComponent(), BorderLayout.CENTER);
@@ -32,20 +30,59 @@ public class JNotepadPP extends JFrame {
         createStatusBar();
 
         setTitle("JNotepad++");
-        setSize(800, 600); // Set an appropriate size
-        setLocationRelativeTo(null); // Center the window
+        setSize(800, 600);
+        setLocationRelativeTo(null);
 
         addWindowListener(new WindowAdapter() {
+            @Override
             public void windowClosing(WindowEvent e) {
-                // Implement closing logic (check for unsaved documents, etc.)
+                handleWindowClosing();
             }
         });
     }
 
     private void createToolbar() {
         JToolBar toolBar = new JToolBar();
-// Add buttons for common actions (New, Open, Save, etc.)
-// Add action listeners to buttons
+
+        JButton newButton = new JButton("New");
+        newButton.addActionListener(e -> handleNew());
+        toolBar.add(newButton);
+
+        JButton openButton = new JButton("Open");
+        openButton.addActionListener(e -> handleOpen());
+        toolBar.add(openButton);
+
+        JButton saveButton = new JButton("Save");
+        saveButton.addActionListener(e -> handleSave());
+        toolBar.add(saveButton);
+
+        JButton saveAsButton = new JButton("Save As...");
+        saveAsButton.addActionListener(e -> handleSaveAs());
+        toolBar.add(saveAsButton);
+
+        JButton cutButton = new JButton("Cut");
+        cutButton.addActionListener(e -> handleCut());
+        toolBar.add(cutButton);
+
+        JButton copyButton = new JButton("Copy");
+        copyButton.addActionListener(e -> handleCopy());
+        toolBar.add(copyButton);
+
+        JButton pasteButton = new JButton("Paste");
+        pasteButton.addActionListener(e -> handlePaste());
+        toolBar.add(pasteButton);
+
+        JButton statsButton = new JButton("Statistics");
+        statsButton.addActionListener(e -> handleStats());
+        toolBar.add(statsButton);
+
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> handleClose());
+        toolBar.add(closeButton);
+
+        JButton exitButton = new JButton("Exit");
+        exitButton.addActionListener(e -> handleWindowClosing());
+        toolBar.add(exitButton);
 
         add(toolBar, BorderLayout.NORTH);
     }
@@ -81,6 +118,10 @@ public class JNotepadPP extends JFrame {
         closeDocument.addActionListener(e -> handleClose());
         fileMenu.add(closeDocument);
 
+        JMenuItem exit = new JMenuItem("Exit");
+        exit.addActionListener(e -> handleWindowClosing());
+        fileMenu.add(exit);
+
         JMenu editMenu = new JMenu("Edit");
         menuBar.add(editMenu);
 
@@ -103,7 +144,7 @@ public class JNotepadPP extends JFrame {
     }
 
     private void createStatusBar() {
-        JPanel statusBar = new JPanel(new BorderLayout());
+        StatusBar statusBar = StatusBar.getInstance();
         add(statusBar, BorderLayout.SOUTH);
     }
 
@@ -122,8 +163,16 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    private void handleSave(SingleDocumentModel currentDoc) {
+        handleSaveForDoc(currentDoc);
+    }
+
     private void handleSave() {
         SingleDocumentModel currentDoc = getCurrentDocument();
+        handleSaveForDoc(currentDoc);
+    }
+
+    private void handleSaveForDoc(SingleDocumentModel currentDoc) {
         if (currentDoc == null) return;
 
         Path newFilePath = currentDoc.getFilePath();
@@ -134,6 +183,7 @@ public class JNotepadPP extends JFrame {
 
         saveDocument(currentDoc, newFilePath);
     }
+
 
     private void handleSaveAs() {
         SingleDocumentModel currentDoc = getCurrentDocument();
@@ -235,20 +285,28 @@ public class JNotepadPP extends JFrame {
             @Override
             public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
                 updateWindowTitle();
+                updateStatusBar();
             }
 
             @Override
             public void documentAdded(SingleDocumentModel model) {
                 updateWindowTitle();
+                updateStatusBar();
             }
 
             @Override
             public void documentRemoved(SingleDocumentModel model) {
                 updateWindowTitle();
+                updateStatusBar();
             }
         });
     }
 
+
+    private void updateStatusBar() {
+        JTextArea textArea = getCurrentTextArea();
+        StatusBar.getInstance().updateStatusBar(textArea);
+    }
 
     private void updateWindowTitle() {
         SingleDocumentModel currentDoc = getCurrentDocument();
@@ -274,14 +332,44 @@ public class JNotepadPP extends JFrame {
 
             if (result == JOptionPane.YES_OPTION) {
                 handleSave();
-                return true; // Proceed after saving
-            } else if (result == JOptionPane.NO_OPTION) {
-                return true; // Proceed without saving
-            } else {
-                return false;
-            }
+                return true;
+            } else return result == JOptionPane.NO_OPTION;
         }
         return true;
+    }
+
+    private String getDocumentName(SingleDocumentModel documentModel) {
+        if (documentModel.getFilePath() != null) {
+            return documentModel.getFilePath().getFileName().toString();
+        } else {
+            return "unnamed";
+        }
+    }
+
+    private boolean checkAndHandleUnsavedDocuments() {
+        boolean shouldDispose = true;
+        for (SingleDocumentModel doc : multipleDocumentModel) {
+            if (doc.isModified()) {
+                int result = JOptionPane.showConfirmDialog(
+                        this,
+                        "The document '" + getDocumentName(doc) + "' has unsaved changes. Do you want to save them?",
+                        "Unsaved Changes",
+                        JOptionPane.YES_NO_CANCEL_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+                if (result == JOptionPane.YES_OPTION) {
+                    handleSave(doc);
+                } else shouldDispose = result == JOptionPane.NO_OPTION;
+            }
+        }
+        return shouldDispose;
+    }
+
+    private void handleWindowClosing() {
+        if (checkAndHandleUnsavedDocuments()) {
+            dispose();
+        }
     }
 
     private SingleDocumentModel getCurrentDocument() {

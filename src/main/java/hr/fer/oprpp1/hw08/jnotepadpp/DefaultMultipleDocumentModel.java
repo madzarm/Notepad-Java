@@ -79,6 +79,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
         notifyDocumentAdded(document);
         setFocus(document);
         updateTabTitleAndTooltip(document, title);
+        document.getTextComponent().addCaretListener(e -> updateStatusBar(document));
     }
 
     @Override
@@ -168,6 +169,11 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
                 updateTabTitleAndTooltip(model, model.getFilePath() != null ? model.getFilePath().getFileName().toString() : "unnamed");
             }
         });
+    }
+
+    private void updateStatusBar(SingleDocumentModel model) {
+        JTextArea textArea = model.getTextComponent();
+        StatusBar.getInstance().updateStatusBar(textArea);
     }
 
     public void setCurrentDocument(SingleDocumentModel currentDocument) {
