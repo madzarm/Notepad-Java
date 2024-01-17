@@ -54,7 +54,7 @@ public class StatusBar extends JPanel {
     public void updateStatusBar(JTextArea area) {
         if (area == null) {
             lengthLabel.setText("Length: 0");
-            lineColSelLabel.setText("Ln: 0 Col: 0 Sel: 0");
+            lineColSelLabel.setText("Ln: 0 Col: 0");
             return;
         }
         int length = area.getText().length();
@@ -78,8 +78,8 @@ public class StatusBar extends JPanel {
         currentTextArea = area;
         if (area != null) {
             area.addCaretListener(e -> updateStatusBar(area));
-            updateStatusBar(area);
         }
+        updateStatusBar(area);
     }
 
     private void detachCurrentTextArea() {
