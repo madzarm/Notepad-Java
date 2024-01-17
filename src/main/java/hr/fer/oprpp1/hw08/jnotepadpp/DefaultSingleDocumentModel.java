@@ -38,6 +38,9 @@ public class DefaultSingleDocumentModel implements SingleDocumentModel{
                 notifyModifyStatusChanged();
             }
         });
+
+        notifyPathUpdated();
+        notifyModifyStatusChanged();
     }
 
     @Override

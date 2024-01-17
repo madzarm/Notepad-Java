@@ -38,11 +38,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
     @Override
     public SingleDocumentModel createNewDocument() {
         SingleDocumentModel newDoc = new DefaultSingleDocumentModel(null, "");
-        documentModels.add(newDoc);
-        addTab("untitled", new JScrollPane(newDoc.getTextComponent()));
-        setCurrentDocument(newDoc);
-        addListeners(newDoc);
-        notifyDocumentAdded(newDoc);
+        setupDocumentTab(newDoc, "unnamed");
         return newDoc;
     }
 
@@ -70,12 +66,19 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
             e.printStackTrace();
         }
         SingleDocumentModel newDoc = new DefaultSingleDocumentModel(path, content);
-        documentModels.add(newDoc);
-        addTab(path.getFileName().toString(), new JScrollPane(newDoc.getTextComponent()));
-        addListeners(newDoc);
-        notifyDocumentAdded(newDoc);
-        setCurrentDocument(newDoc);
+        setupDocumentTab(newDoc, path.getFileName().toString());
+
         return newDoc;
+    }
+
+    private void setupDocumentTab(SingleDocumentModel document, String title) {
+        documentModels.add(document);
+        addTab(title, new JScrollPane(document.getTextComponent()));
+        setCurrentDocument(document);
+        updateTabIcon(document);
+        notifyDocumentAdded(document);
+        setFocus(document);
+        updateTabTitleAndTooltip(document, title);
     }
 
     @Override
@@ -92,6 +95,7 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
             Files.write(path, model.getTextComponent().getText().getBytes());
             model.setModified(false);
             model.setFilePath(path);
+            notifyPathChanged(model);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -105,8 +109,8 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
             documentModels.remove(index);
             if (currentDocument == model) {
                 currentDocument = documentModels.isEmpty() ? null : documentModels.get(0);
-                notifyDocumentRemoved(model);
             }
+            notifyDocumentRemoved(model);
         }
     }
 
@@ -155,22 +159,27 @@ public class DefaultMultipleDocumentModel extends JTabbedPane implements Multipl
             @Override
             public void documentModifyStatusUpdated(SingleDocumentModel model) {
                 updateTabIcon(model);
-                updateTabTitleAndTooltip(model, model.getFilePath() != null ? model.getFilePath().getFileName().toString() : "(unnamed)");
+                updateTabTitleAndTooltip(model, model.getFilePath() != null ? model.getFilePath().getFileName().toString() : "unnamed");
             }
 
             @Override
             public void documentFilePathUpdated(SingleDocumentModel model) {
                 updateTabIcon(model);
-                updateTabTitleAndTooltip(model, model.getFilePath() != null ? model.getFilePath().getFileName().toString() : "(unnamed)");
+                updateTabTitleAndTooltip(model, model.getFilePath() != null ? model.getFilePath().getFileName().toString() : "unnamed");
             }
         });
     }
 
     public void setCurrentDocument(SingleDocumentModel currentDocument) {
         this.currentDocument = currentDocument;
+        notifyPathChanged(currentDocument);
     }
 
-    // Implement the listener methods
+    private void setFocus(SingleDocumentModel currentDoc) {
+        int index = getIndexOfDocument(currentDoc);
+        setSelectedIndex(index);
+    }
+
     private void notifyDocumentAdded(SingleDocumentModel model) {
         for (MultipleDocumentListener listener : multipleDocumentListeners) {
             listener.documentAdded(model);

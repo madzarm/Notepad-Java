@@ -15,39 +15,18 @@ import java.nio.file.Path;
 public class JNotepadPP extends JFrame {
 
     private MultipleDocumentModel multipleDocumentModel;
-    private ImageIcon unmodifiedIcon;
-    private ImageIcon modifiedIcon;
 
     public JNotepadPP() {
-        unmodifiedIcon = resizeIcon(loadIcon("green-diskette.png"), 16, 16);
-        modifiedIcon = resizeIcon(loadIcon("red-diskette.png"), 16, 16);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         initGui();
     }
 
-    private ImageIcon loadIcon(String iconName) {
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream(iconName);
-        if (is == null) {
-            throw new RuntimeException("Icon file not found: " + iconName);
-        }
-        try {
-            byte[] bytes = is.readAllBytes();
-            return new ImageIcon(bytes);
-        } catch (IOException ex) {
-            throw new RuntimeException("Error reading icon file: " + iconName, ex);
-        } finally {
-            try {
-                is.close();
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            }
-        }
-    }
+
 
     private void initGui() {
         multipleDocumentModel = new DefaultMultipleDocumentModel();
         getContentPane().add(multipleDocumentModel.getVisualComponent(), BorderLayout.CENTER);
-
+        addListeners();
         createMenus();
         createToolbar();
         createStatusBar();
@@ -125,13 +104,11 @@ public class JNotepadPP extends JFrame {
 
     private void createStatusBar() {
         JPanel statusBar = new JPanel(new BorderLayout());
-
         add(statusBar, BorderLayout.SOUTH);
     }
 
     private void handleNew() {
-        createDocumentAndSetFocus();
-        updateWindowTitle();
+        multipleDocumentModel.createNewDocument();
     }
 
     private void handleOpen() {
@@ -141,10 +118,7 @@ public class JNotepadPP extends JFrame {
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = fileChooser.getSelectedFile();
-            var currentModel = multipleDocumentModel.loadDocument(selectedFile.toPath());
-            addIconListener(currentModel);
-            updateTabIcon(currentModel);
-            setFocus(currentModel);
+            multipleDocumentModel.loadDocument(selectedFile.toPath());
         }
     }
 
@@ -245,8 +219,6 @@ public class JNotepadPP extends JFrame {
         try {
             multipleDocumentModel.saveDocument(doc, filePath);
             doc.setFilePath(filePath);
-            updateTabIcon(doc);
-            updateTabName(String.valueOf(filePath.getFileName()), doc);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(
                     this,
@@ -257,53 +229,34 @@ public class JNotepadPP extends JFrame {
         }
     }
 
-    private void updateTabName(String newName, SingleDocumentModel currentDoc) {
-        if (newName != null && !newName.isBlank()) {
-            ((DefaultMultipleDocumentModel) multipleDocumentModel).setTitleAt(
-                    multipleDocumentModel.getIndexOfDocument(currentDoc),
-                    newName
-            );
-        }
-    }
 
-    private void createDocumentAndSetFocus() {
-        SingleDocumentModel currentDoc = multipleDocumentModel.createNewDocument();
-        updateTabIcon(currentDoc);
-        addIconListener(currentDoc);
-        setFocus(currentDoc);
-    }
-
-    private void setFocus(SingleDocumentModel currentDoc) {
-        int index = multipleDocumentModel.getIndexOfDocument(currentDoc);
-        ((DefaultMultipleDocumentModel) multipleDocumentModel).setSelectedIndex(index);
-    }
-
-    private void updateTabIcon(SingleDocumentModel model) {
-        int index = multipleDocumentModel.getIndexOfDocument(model);
-        if (model.isModified()) {
-            ((DefaultMultipleDocumentModel) multipleDocumentModel).setIconAt(index, modifiedIcon);
-        } else {
-            ((DefaultMultipleDocumentModel) multipleDocumentModel).setIconAt(index, unmodifiedIcon);
-        }
-    }
-
-    private void addIconListener(SingleDocumentModel currentDoc) {
-        currentDoc.addSingleDocumentListener(new SingleDocumentListener() {
+    private void addListeners() {
+        multipleDocumentModel.addMultipleDocumentListener(new MultipleDocumentListener() {
             @Override
-            public void documentModifyStatusUpdated(SingleDocumentModel model) {
-                updateTabIcon(model);
+            public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
+                updateWindowTitle();
             }
 
             @Override
-            public void documentFilePathUpdated(SingleDocumentModel model) {
-                updateTabIcon(model);
+            public void documentAdded(SingleDocumentModel model) {
+                updateWindowTitle();
+            }
+
+            @Override
+            public void documentRemoved(SingleDocumentModel model) {
+                updateWindowTitle();
             }
         });
     }
 
+
     private void updateWindowTitle() {
         SingleDocumentModel currentDoc = getCurrentDocument();
-        String title = currentDoc != null && currentDoc.getFilePath() != null
+        if (currentDoc == null) {
+            setTitle("JNotepad++");
+            return;
+        }
+        String title = currentDoc.getFilePath() != null
                 ? currentDoc.getFilePath().toString()
                 : "unnamed";
         setTitle(title + " - JNotepad++");
@@ -329,12 +282,6 @@ public class JNotepadPP extends JFrame {
             }
         }
         return true;
-    }
-
-    private ImageIcon resizeIcon(ImageIcon icon, int width, int height) {
-        Image img = icon.getImage();
-        Image resizedImage = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        return new ImageIcon(resizedImage);
     }
 
     private SingleDocumentModel getCurrentDocument() {
