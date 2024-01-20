@@ -5,13 +5,8 @@ import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Path;
 
-/**
- * App must be executable from here
- */
 public class JNotepadPP extends JFrame {
 
     private MultipleDocumentModel multipleDocumentModel;
@@ -22,6 +17,7 @@ public class JNotepadPP extends JFrame {
     }
 
     private void initGui() {
+        //
         multipleDocumentModel = new DefaultMultipleDocumentModel();
         getContentPane().add(multipleDocumentModel.getVisualComponent(), BorderLayout.CENTER);
         addListeners();
