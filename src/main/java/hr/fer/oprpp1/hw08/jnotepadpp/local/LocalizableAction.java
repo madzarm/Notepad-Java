@@ -24,7 +24,6 @@ public class LocalizableAction extends AbstractAction {
 
     private void updateActionName() {
         String translation = lp.getString(key);
-        System.out.println("Updating action name for key: " + key + " with translation: " + translation);
         putValue(NAME, translation);
     }
 
