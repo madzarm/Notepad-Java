@@ -18,8 +18,10 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -27,6 +29,7 @@ public class JNotepadPP extends JFrame {
 
     private MultipleDocumentModel multipleDocumentModel;
     private FormLocalizationProvider flp;
+    private Map<String, AbstractButton> buttons = new HashMap<>();
 
     public JNotepadPP() {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -47,6 +50,8 @@ public class JNotepadPP extends JFrame {
         setTitle("JNotepad++");
         setSize(800, 600);
         setLocationRelativeTo(null);
+
+        updateButtonsEnableStatus();
 
         addWindowListener(new WindowAdapter() {
             @Override
@@ -161,10 +166,12 @@ public class JNotepadPP extends JFrame {
         JMenuItem toUppercase = new LocalizedMenuItem("to_uppercase", flp);
         modifyTextCase(toUppercase, String::toUpperCase);
         changeCase.add(toUppercase);
+        buttons.put("to_uppercase", toUppercase);
 
         JMenuItem toLowercase = new LocalizedMenuItem("to_lowercase", flp);
         modifyTextCase(toLowercase, String::toLowerCase);
         changeCase.add(toLowercase);
+        buttons.put("to_lowercase", toLowercase);
 
         JMenuItem invertCase = new LocalizedMenuItem("invert_case", flp);
         modifyTextCase(invertCase, text -> {
@@ -175,6 +182,7 @@ public class JNotepadPP extends JFrame {
             return new String(chars);
         });
         changeCase.add(invertCase);
+        buttons.put("invert_case", invertCase);
 
         JMenu sort = new LocalizedMenu("sort", flp);
         toolsMenu.add(sort);
@@ -182,14 +190,17 @@ public class JNotepadPP extends JFrame {
         JMenuItem ascending = new LocalizedMenuItem("ascending", flp);
         ascending.addActionListener(e -> handleSortAscending());
         sort.add(ascending);
+        buttons.put("ascending", ascending);
 
         JMenuItem descending = new LocalizedMenuItem("descending", flp);
         descending.addActionListener(e -> handleSortDescending());
         sort.add(descending);
+        buttons.put("descending", descending);
 
         JMenuItem unique = new LocalizedMenuItem("unique", flp);
         unique.addActionListener(e -> handleUnique());
         toolsMenu.add(unique);
+        buttons.put("unique", unique);
 
         JMenu langMenu = new LocalizedMenu("languages", flp);
         menuBar.add(langMenu);
@@ -430,22 +441,40 @@ public class JNotepadPP extends JFrame {
             public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
                 updateWindowTitle();
                 updateStatusBar();
+                updateButtonsEnableStatus();
             }
 
             @Override
             public void documentAdded(SingleDocumentModel model) {
                 updateWindowTitle();
                 updateStatusBar();
+                updateButtonsEnableStatus();
             }
 
             @Override
             public void documentRemoved(SingleDocumentModel model) {
                 updateWindowTitle();
                 updateStatusBar();
+                updateButtonsEnableStatus();
             }
         });
     }
 
+    private void updateButtonsEnableStatus() {
+        JTextArea textArea = getCurrentTextArea();
+        if (textArea != null) {
+            textArea.addCaretListener(e -> {
+                boolean hasSelection = textArea.getSelectionStart() != textArea.getSelectionEnd();
+                for (AbstractButton button : buttons.values()) {
+                    button.setEnabled(hasSelection);
+                }
+            });
+        } else {
+            for (AbstractButton button : buttons.values()) {
+                button.setEnabled(false);
+            }
+        }
+    }
 
     private void updateStatusBar() {
         JTextArea textArea = getCurrentTextArea();
