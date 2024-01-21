@@ -1,8 +1,5 @@
 package hr.fer.oprpp1.hw08.jnotepadpp.local;
 
-/**
- * decorator class that manages connection status
- */
 public class LocalizationProviderBridge extends AbstractLocalizationProvider implements ILocalizationProvider {
 
     private ILocalizationProvider decoratedProvider;

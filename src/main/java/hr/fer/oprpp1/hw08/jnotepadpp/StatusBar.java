@@ -16,25 +16,21 @@ public class StatusBar extends JPanel {
     private StatusBar() {
         super(new BorderLayout());
 
-        JPanel leftPanel = new JPanel(new GridLayout(1, 2)); // Holds the length and lineColSel labels
-        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT)); // Holds the clock
+        JPanel leftPanel = new JPanel(new GridLayout(1, 2));
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 
-        // Initialize the labels
         lengthLabel = new JLabel("Length: 0");
         lineColSelLabel = new JLabel("Ln: 0 Col: 0 Sel: 0");
         clockLabel = new JLabel();
-        updateClock(); // Initialize the clock label with the current time
+        updateClock();
 
-        // Add labels to their respective panels
         leftPanel.add(lengthLabel);
         leftPanel.add(lineColSelLabel);
         rightPanel.add(clockLabel);
 
-        // Add panels to the StatusBar
         add(leftPanel, BorderLayout.CENTER);
         add(rightPanel, BorderLayout.EAST);
 
-        // Set up a timer to update the clockLabel every second
         Timer timer = new Timer(1000, e -> updateClock());
         timer.start();
     }

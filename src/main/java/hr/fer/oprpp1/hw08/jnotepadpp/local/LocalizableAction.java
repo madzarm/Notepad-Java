@@ -13,7 +13,6 @@ public class LocalizableAction extends AbstractAction {
         this.lp = lp;
         updateActionName();
 
-        // Register an anonymous inner class as a listener for localization changes
         lp.addLocalizationListener(new ILocalizationListener() {
             @Override
             public void localizationChanged() {

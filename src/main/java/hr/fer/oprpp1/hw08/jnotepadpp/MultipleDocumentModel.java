@@ -14,7 +14,7 @@ public interface MultipleDocumentModel extends Iterable<SingleDocumentModel> {
     void removeMultipleDocumentListener(MultipleDocumentListener l);
     int getNumberOfDocuments();
     SingleDocumentModel getDocument(int index);
-    SingleDocumentModel findForPath(Path path); //null, if no such model exists
-    int getIndexOfDocument(SingleDocumentModel doc); //-1 if not present
+    SingleDocumentModel findForPath(Path path);
+    int getIndexOfDocument(SingleDocumentModel doc);
 }
 

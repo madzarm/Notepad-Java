@@ -18,9 +18,7 @@ public class FormLocalizationProvider extends LocalizationProviderBridge impleme
     }
 
     @Override
-    public void windowClosing(WindowEvent e) {
-        // This is where you can add any additional cleanup if necessary before disconnecting.
-    }
+    public void windowClosing(WindowEvent e) {}
 
     @Override
     public void windowClosed(WindowEvent e) {
@@ -28,22 +26,14 @@ public class FormLocalizationProvider extends LocalizationProviderBridge impleme
     }
 
     @Override
-    public void windowIconified(WindowEvent e) {
-        // Not used, but must be implemented
-    }
+    public void windowIconified(WindowEvent e) {}
 
     @Override
-    public void windowDeiconified(WindowEvent e) {
-        // Not used, but must be implemented
-    }
+    public void windowDeiconified(WindowEvent e) {}
 
     @Override
-    public void windowActivated(WindowEvent e) {
-        // Not used, but must be implemented
-    }
+    public void windowActivated(WindowEvent e) {}
 
     @Override
-    public void windowDeactivated(WindowEvent e) {
-        // Not used, but must be implemented
-    }
+    public void windowDeactivated(WindowEvent e) {}
 }
