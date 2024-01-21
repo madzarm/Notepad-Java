@@ -1,19 +1,27 @@
 package hr.fer.oprpp1.hw08.jnotepadpp;
 
 import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
-import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizableAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedButton;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedMenu;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedMenuItem;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.nio.file.Path;
+import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Locale;
+import java.util.Set;
+import java.util.function.Function;
 
 public class JNotepadPP extends JFrame {
 
@@ -144,6 +152,45 @@ public class JNotepadPP extends JFrame {
         pasteText.addActionListener(e -> handlePaste());
         editMenu.add(pasteText);
 
+        JMenu toolsMenu = new LocalizedMenu("tools", flp);
+        menuBar.add(toolsMenu);
+
+        JMenu changeCase = new LocalizedMenu("change_case", flp);
+        toolsMenu.add(changeCase);
+
+        JMenuItem toUppercase = new LocalizedMenuItem("to_uppercase", flp);
+        modifyTextCase(toUppercase, String::toUpperCase);
+        changeCase.add(toUppercase);
+
+        JMenuItem toLowercase = new LocalizedMenuItem("to_lowercase", flp);
+        modifyTextCase(toLowercase, String::toLowerCase);
+        changeCase.add(toLowercase);
+
+        JMenuItem invertCase = new LocalizedMenuItem("invert_case", flp);
+        modifyTextCase(invertCase, text -> {
+            char[] chars = text.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                chars[i] = Character.isLowerCase(chars[i]) ? Character.toUpperCase(chars[i]) : Character.toLowerCase(chars[i]);
+            }
+            return new String(chars);
+        });
+        changeCase.add(invertCase);
+
+        JMenu sort = new LocalizedMenu("sort", flp);
+        toolsMenu.add(sort);
+
+        JMenuItem ascending = new LocalizedMenuItem("ascending", flp);
+        ascending.addActionListener(e -> handleSortAscending());
+        sort.add(ascending);
+
+        JMenuItem descending = new LocalizedMenuItem("descending", flp);
+        descending.addActionListener(e -> handleSortDescending());
+        sort.add(descending);
+
+        JMenuItem unique = new LocalizedMenuItem("unique", flp);
+        unique.addActionListener(e -> handleUnique());
+        toolsMenu.add(unique);
+
         JMenu langMenu = new LocalizedMenu("languages", flp);
         menuBar.add(langMenu);
 
@@ -160,6 +207,80 @@ public class JNotepadPP extends JFrame {
         de.addActionListener(e -> LocalizationProvider.getInstance().setLanguage("de"));
 
         setJMenuBar(menuBar);
+    }
+
+    private void handleUnique() {
+        JTextArea textArea = getCurrentTextArea();
+        if (textArea == null) return;
+
+        try {
+            int start = textArea.getLineStartOffset(textArea.getLineOfOffset(textArea.getSelectionStart()));
+            int end = textArea.getLineEndOffset(textArea.getLineOfOffset(textArea.getSelectionEnd()));
+            String selectedText = textArea.getText(start, end - start);
+
+            String[] lines = selectedText.split("\\r?\\n");
+            Set<String> uniqueLines = new LinkedHashSet<>();
+            Collections.addAll(uniqueLines, lines);
+
+            StringBuilder sb = new StringBuilder();
+            for (String line : uniqueLines) {
+                sb.append(line).append("\n");
+            }
+
+            textArea.replaceRange(sb.toString(), start, end);
+        } catch (BadLocationException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void handleSortAscending() {
+        JTextArea textArea = getCurrentTextArea();
+        if (textArea == null) return;
+
+        Comparator<String> ascendingComparator = (s1, s2) ->
+                Collator.getInstance(new Locale(flp.getLanguage())).compare(s1, s2);
+        sortTextArea(textArea, ascendingComparator);
+    }
+
+    private void handleSortDescending() {
+        JTextArea textArea = getCurrentTextArea();
+        if (textArea == null) return;
+
+        Comparator<String> descendingComparator = (s1, s2) ->
+                Collator.getInstance(new Locale(flp.getLanguage())).compare(s2, s1);
+        sortTextArea(textArea, descendingComparator);
+    }
+
+    private void sortTextArea(JTextArea textArea, Comparator<String> comparator) {
+        try {
+            int start = textArea.getLineStartOffset(textArea.getLineOfOffset(textArea.getSelectionStart()));
+            int end = textArea.getLineEndOffset(textArea.getLineOfOffset(textArea.getSelectionEnd()));
+            String selectedText = textArea.getText(start, end - start);
+
+            String[] lines = selectedText.split("\\r?\\n");
+            Arrays.sort(lines, comparator);
+
+            StringBuilder sb = new StringBuilder();
+            for (String line : lines) {
+                sb.append(line).append("\n");
+            }
+
+            textArea.replaceRange(sb.toString(), start, end);
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void modifyTextCase(JMenuItem menuItem, Function<String, String> caseModifier) {
+        menuItem.addActionListener(e -> {
+            JTextArea textArea = getCurrentTextArea();
+            if (textArea != null) {
+                String text = textArea.getSelectedText();
+                if (text != null) {
+                    textArea.replaceSelection(caseModifier.apply(text));
+                }
+            }
+        });
     }
 
     private void createStatusBar() {
@@ -375,7 +496,7 @@ public class JNotepadPP extends JFrame {
             if (doc.isModified()) {
 
                 String formattedMessage = MessageFormat.format(
-                        flp.getString("unsaved_changes_message"),
+                        flp.getString("unsaved_changes_message_var"),
                         getDocumentName(doc)
                 );
 
