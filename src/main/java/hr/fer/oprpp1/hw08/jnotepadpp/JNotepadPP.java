@@ -25,17 +25,37 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+/**
+ * Main application frame for JNotepad++, a multiple document text editor.
+ */
 public class JNotepadPP extends JFrame {
 
+    /**
+     * Model handling multiple documents.
+     */
     private MultipleDocumentModel multipleDocumentModel;
+
+    /**
+     * Localization provider for form localization.
+     */
     private FormLocalizationProvider flp;
+
+    /**
+     * A map for storing buttons with their corresponding actions.
+     */
     private Map<String, AbstractButton> buttons = new HashMap<>();
 
+    /**
+     * Constructs the JNotepadPP main frame.
+     */
     public JNotepadPP() {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         initGui();
     }
 
+    /**
+     * Initializes the graphical user interface.
+     */
     private void initGui() {
         multipleDocumentModel = new DefaultMultipleDocumentModel();
         getContentPane().add(multipleDocumentModel.getVisualComponent(), BorderLayout.CENTER);
@@ -61,6 +81,9 @@ public class JNotepadPP extends JFrame {
         });
     }
 
+    /**
+     * Creates and initializes the toolbar.
+     */
     private void createToolbar() {
         JToolBar toolBar = new JToolBar();
 
@@ -108,6 +131,9 @@ public class JNotepadPP extends JFrame {
     }
 
 
+    /**
+     * Creates and initializes the menus.
+     */
     private void createMenus() {
         JMenuBar menuBar = new JMenuBar();
 
@@ -220,6 +246,9 @@ public class JNotepadPP extends JFrame {
         setJMenuBar(menuBar);
     }
 
+    /**
+     * Handles the 'unique' action.
+     */
     private void handleUnique() {
         JTextArea textArea = getCurrentTextArea();
         if (textArea == null) return;
@@ -244,6 +273,9 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Handles the 'sort ascending' action.
+     */
     private void handleSortAscending() {
         JTextArea textArea = getCurrentTextArea();
         if (textArea == null) return;
@@ -253,6 +285,9 @@ public class JNotepadPP extends JFrame {
         sortTextArea(textArea, ascendingComparator);
     }
 
+    /**
+     * Handles the 'sort descending' action.
+     */
     private void handleSortDescending() {
         JTextArea textArea = getCurrentTextArea();
         if (textArea == null) return;
@@ -262,6 +297,11 @@ public class JNotepadPP extends JFrame {
         sortTextArea(textArea, descendingComparator);
     }
 
+    /**
+     * Sorts the text area's content using the provided comparator.
+     * @param textArea The JTextArea to sort.
+     * @param comparator The comparator to use for sorting.
+     */
     private void sortTextArea(JTextArea textArea, Comparator<String> comparator) {
         try {
             int start = textArea.getLineStartOffset(textArea.getLineOfOffset(textArea.getSelectionStart()));
@@ -282,6 +322,11 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Modifies text case based on the provided function.
+     * @param menuItem The menu item associated with the action.
+     * @param caseModifier The function to apply for case modification.
+     */
     private void modifyTextCase(JMenuItem menuItem, Function<String, String> caseModifier) {
         menuItem.addActionListener(e -> {
             JTextArea textArea = getCurrentTextArea();
@@ -294,15 +339,24 @@ public class JNotepadPP extends JFrame {
         });
     }
 
+    /**
+     * Creates and initializes the status bar.
+     */
     private void createStatusBar() {
         StatusBar statusBar = StatusBar.getInstance();
         add(statusBar, BorderLayout.SOUTH);
     }
 
+    /**
+     * Handles the action for creating a new document.
+     */
     private void handleNew() {
         multipleDocumentModel.createNewDocument();
     }
 
+    /**
+     * Handles the action for opening a document.
+     */
     private void handleOpen() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -314,15 +368,26 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Saves the current document.
+     * @param currentDoc The current document to save.
+     */
     private void handleSave(SingleDocumentModel currentDoc) {
         handleSaveForDoc(currentDoc);
     }
 
+    /**
+     * Saves the current document. This method is used by both handleSave and handleSaveAs.
+     */
     private void handleSave() {
         SingleDocumentModel currentDoc = getCurrentDocument();
         handleSaveForDoc(currentDoc);
     }
 
+    /**
+     * Handles saving a document, given a SingleDocumentModel.
+     * @param currentDoc The document to be saved.
+     */
     private void handleSaveForDoc(SingleDocumentModel currentDoc) {
         if (currentDoc == null) return;
 
@@ -335,7 +400,9 @@ public class JNotepadPP extends JFrame {
         saveDocument(currentDoc, newFilePath);
     }
 
-
+    /**
+     * Handles the action for saving a document with a new path.
+     */
     private void handleSaveAs() {
         SingleDocumentModel currentDoc = getCurrentDocument();
         if (currentDoc == null) return;
@@ -346,6 +413,9 @@ public class JNotepadPP extends JFrame {
         saveDocument(currentDoc, newFilePath);
     }
 
+    /**
+     * Handles the action for closing the current document.
+     */
     private void handleClose() {
         SingleDocumentModel currentDoc = getCurrentDocument();
         if (currentDoc == null) return;
@@ -355,6 +425,9 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Handles the action for cutting text from the document.
+     */
     private void handleCut() {
         JTextArea textArea = getCurrentTextArea();
         if (textArea != null) {
@@ -362,6 +435,9 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Handles the action for copying text from the document.
+     */
     private void handleCopy() {
         JTextArea textArea = getCurrentTextArea();
         if (textArea != null) {
@@ -369,6 +445,9 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Handles the action for pasting text into the document.
+     */
     private void handlePaste() {
         JTextArea textArea = getCurrentTextArea();
         if (textArea != null) {
@@ -376,6 +455,9 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Handles the action for displaying statistics about the current document.
+     */
     private void handleStats() {
         JTextArea textArea = getCurrentTextArea();
         if (textArea != null) {
@@ -396,6 +478,10 @@ public class JNotepadPP extends JFrame {
         	}
     }
 
+    /**
+     * Retrieves the current document's JTextArea.
+     * @return The JTextArea of the current document.
+     */
     private JTextArea getCurrentTextArea() {
         SingleDocumentModel currentDoc = getCurrentDocument();
         if (currentDoc == null) return null;
@@ -403,8 +489,10 @@ public class JNotepadPP extends JFrame {
         return currentDoc.getTextComponent();
     }
 
-
-
+    /**
+     * Chooses a file path for saving a document.
+     * @return The selected file path.
+     */
     private Path chooseFilePath() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
@@ -419,6 +507,11 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Saves the specified document to the given path.
+     * @param doc The document to save.
+     * @param filePath The path to save the document.
+     */
     private void saveDocument(SingleDocumentModel doc, Path filePath) {
         try {
             multipleDocumentModel.saveDocument(doc, filePath);
@@ -434,7 +527,9 @@ public class JNotepadPP extends JFrame {
         }
     }
 
-
+    /**
+     * Adds listeners to various components and models.
+     */
     private void addListeners() {
         multipleDocumentModel.addMultipleDocumentListener(new MultipleDocumentListener() {
             @Override
@@ -460,6 +555,9 @@ public class JNotepadPP extends JFrame {
         });
     }
 
+    /**
+     * Updates the enable status of buttons based on the current state.
+     */
     private void updateButtonsEnableStatus() {
         JTextArea textArea = getCurrentTextArea();
         if (textArea != null) {
@@ -476,11 +574,17 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Updates the status bar.
+     */
     private void updateStatusBar() {
         JTextArea textArea = getCurrentTextArea();
         StatusBar.getInstance().attachToTextArea(textArea);
     }
 
+    /**
+     * Updates the window title based on the current document.
+     */
     private void updateWindowTitle() {
         SingleDocumentModel currentDoc = getCurrentDocument();
         if (currentDoc == null) {
@@ -493,6 +597,10 @@ public class JNotepadPP extends JFrame {
         setTitle(title + " - JNotepad++");
     }
 
+    /**
+     * Checks for unsaved changes in the current document.
+     * @return True if it's safe to proceed, false otherwise.
+     */
     private boolean checkForUnsavedChanges() {
         if (getCurrentDocument() != null && getCurrentDocument().isModified()) {
             int result = JOptionPane.showConfirmDialog(
@@ -511,6 +619,11 @@ public class JNotepadPP extends JFrame {
         return true;
     }
 
+    /**
+     * Retrieves the name of the document from the provided document model.
+     * @param documentModel The document model.
+     * @return The name of the document.
+     */
     private String getDocumentName(SingleDocumentModel documentModel) {
         if (documentModel.getFilePath() != null) {
             return documentModel.getFilePath().getFileName().toString();
@@ -519,6 +632,10 @@ public class JNotepadPP extends JFrame {
         }
     }
 
+    /**
+     * Checks and handles unsaved documents before closing.
+     * @return True if it's safe to close, false otherwise.
+     */
     private boolean checkAndHandleUnsavedDocuments() {
         boolean shouldDispose = true;
         for (SingleDocumentModel doc : multipleDocumentModel) {
@@ -554,16 +671,27 @@ public class JNotepadPP extends JFrame {
         return shouldDispose;
     }
 
+    /**
+     * Handles the window closing event.
+     */
     private void handleWindowClosing() {
         if (checkAndHandleUnsavedDocuments()) {
             dispose();
         }
     }
 
+    /**
+     * Retrieves the current document model.
+     * @return The current SingleDocumentModel.
+     */
     private SingleDocumentModel getCurrentDocument() {
         return multipleDocumentModel.getCurrentDocument();
     }
 
+    /**
+     * The main method to start the JNotepadPP application.
+     * @param args Command line arguments.
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new JNotepadPP().setVisible(true);
