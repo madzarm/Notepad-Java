@@ -63,7 +63,7 @@ public class JNotepadPP extends JFrame {
         saveButton.addActionListener(e -> handleSave());
         toolBar.add(saveButton);
 
-        JButton saveAsButton = new LocalizedButton("saveas", flp);
+        JButton saveAsButton = new LocalizedButton("save_as", flp);
         saveAsButton.addActionListener(e -> handleSaveAs());
         toolBar.add(saveAsButton);
 
@@ -113,7 +113,7 @@ public class JNotepadPP extends JFrame {
         saveDocument.addActionListener(e -> handleSave());
         fileMenu.add(saveDocument);
 
-        JMenuItem saveAsDocument = new LocalizedMenuItem("saveas", flp);
+        JMenuItem saveAsDocument = new LocalizedMenuItem("save_as", flp);
         saveAsDocument.addActionListener(e -> handleSaveAs());
         fileMenu.add(saveAsDocument);
 
@@ -276,7 +276,7 @@ public class JNotepadPP extends JFrame {
     private Path chooseFilePath() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
-        fileChooser.setDialogTitle("Save file");
+        fileChooser.setDialogTitle(flp.getString("save_as"));
         int result = fileChooser.showSaveDialog(this);
 
         if (result == JFileChooser.APPROVE_OPTION) {
@@ -292,10 +292,11 @@ public class JNotepadPP extends JFrame {
             multipleDocumentModel.saveDocument(doc, filePath);
             doc.setFilePath(filePath);
         } catch (Exception ex) {
+            String formattedMessage = flp.getString("save_error_message") + ": " + ex.getMessage();
             JOptionPane.showMessageDialog(
                     this,
-                    "Error while saving file: " + ex.getMessage(),
-                    "Error",
+                    formattedMessage,
+                    flp.getString("error"),
                     JOptionPane.ERROR_MESSAGE
             );
         }
@@ -346,8 +347,8 @@ public class JNotepadPP extends JFrame {
         if (getCurrentDocument() != null && getCurrentDocument().isModified()) {
             int result = JOptionPane.showConfirmDialog(
                     this,
-                    "The current document has unsaved changes. Do you want to save them?",
-                    "Unsaved Changes",
+                    flp.getString("unsaved_changes_message"),
+                    flp.getString("unsaved_changes"),
                     JOptionPane.YES_NO_CANCEL_OPTION,
                     JOptionPane.WARNING_MESSAGE
             );
@@ -372,12 +373,27 @@ public class JNotepadPP extends JFrame {
         boolean shouldDispose = true;
         for (SingleDocumentModel doc : multipleDocumentModel) {
             if (doc.isModified()) {
-                int result = JOptionPane.showConfirmDialog(
+
+                String formattedMessage = MessageFormat.format(
+                        flp.getString("unsaved_changes_message"),
+                        getDocumentName(doc)
+                );
+
+                Object[] options = {
+                        flp.getString("yes"),
+                        flp.getString("no"),
+                        flp.getString("cancel")
+                };
+
+                int result = JOptionPane.showOptionDialog(
                         this,
-                        "The document '" + getDocumentName(doc) + "' has unsaved changes. Do you want to save them?",
-                        "Unsaved Changes",
+                        formattedMessage,
+                        flp.getString("unsaved_changes"),
                         JOptionPane.YES_NO_CANCEL_OPTION,
-                        JOptionPane.WARNING_MESSAGE
+                        JOptionPane.WARNING_MESSAGE,
+                        null,
+                        options,
+                        options[0]
                 );
 
                 if (result == JOptionPane.YES_OPTION) {
