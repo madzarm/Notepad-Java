@@ -1,5 +1,8 @@
 package hr.fer.oprpp1.hw08.jnotepadpp;
 
+import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -17,7 +20,6 @@ public class JNotepadPP extends JFrame {
     }
 
     private void initGui() {
-        //
         multipleDocumentModel = new DefaultMultipleDocumentModel();
         getContentPane().add(multipleDocumentModel.getVisualComponent(), BorderLayout.CENTER);
         addListeners();
