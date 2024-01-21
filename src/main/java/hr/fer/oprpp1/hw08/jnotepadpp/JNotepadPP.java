@@ -1,7 +1,11 @@
 package hr.fer.oprpp1.hw08.jnotepadpp;
 
 import hr.fer.oprpp1.hw08.jnotepadpp.local.FormLocalizationProvider;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizableAction;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedButton;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedMenu;
+import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedMenuItem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -9,10 +13,12 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.nio.file.Path;
+import java.text.MessageFormat;
 
 public class JNotepadPP extends JFrame {
 
     private MultipleDocumentModel multipleDocumentModel;
+    private FormLocalizationProvider flp;
 
     public JNotepadPP() {
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
@@ -22,6 +28,9 @@ public class JNotepadPP extends JFrame {
     private void initGui() {
         multipleDocumentModel = new DefaultMultipleDocumentModel();
         getContentPane().add(multipleDocumentModel.getVisualComponent(), BorderLayout.CENTER);
+
+        flp = new FormLocalizationProvider(LocalizationProvider.getInstance(), this);
+
         addListeners();
         createMenus();
         createToolbar();
@@ -42,43 +51,43 @@ public class JNotepadPP extends JFrame {
     private void createToolbar() {
         JToolBar toolBar = new JToolBar();
 
-        JButton newButton = new JButton("New");
+        JButton newButton = new LocalizedButton("new", flp);
         newButton.addActionListener(e -> handleNew());
         toolBar.add(newButton);
 
-        JButton openButton = new JButton("Open");
+        JButton openButton = new LocalizedButton("open", flp);
         openButton.addActionListener(e -> handleOpen());
         toolBar.add(openButton);
 
-        JButton saveButton = new JButton("Save");
+        JButton saveButton = new LocalizedButton("save", flp);
         saveButton.addActionListener(e -> handleSave());
         toolBar.add(saveButton);
 
-        JButton saveAsButton = new JButton("Save As...");
+        JButton saveAsButton = new LocalizedButton("saveas", flp);
         saveAsButton.addActionListener(e -> handleSaveAs());
         toolBar.add(saveAsButton);
 
-        JButton cutButton = new JButton("Cut");
+        JButton cutButton = new LocalizedButton("cut", flp);
         cutButton.addActionListener(e -> handleCut());
         toolBar.add(cutButton);
 
-        JButton copyButton = new JButton("Copy");
+        JButton copyButton = new LocalizedButton("copy", flp);
         copyButton.addActionListener(e -> handleCopy());
         toolBar.add(copyButton);
 
-        JButton pasteButton = new JButton("Paste");
+        JButton pasteButton = new LocalizedButton("paste", flp);
         pasteButton.addActionListener(e -> handlePaste());
         toolBar.add(pasteButton);
 
-        JButton statsButton = new JButton("Statistics");
+        JButton statsButton = new LocalizedButton("statistics", flp);
         statsButton.addActionListener(e -> handleStats());
         toolBar.add(statsButton);
 
-        JButton closeButton = new JButton("Close");
+        JButton closeButton = new LocalizedButton("close", flp);
         closeButton.addActionListener(e -> handleClose());
         toolBar.add(closeButton);
 
-        JButton exitButton = new JButton("Exit");
+        JButton exitButton = new LocalizedButton("exit", flp);
         exitButton.addActionListener(e -> handleWindowClosing());
         toolBar.add(exitButton);
 
@@ -89,54 +98,66 @@ public class JNotepadPP extends JFrame {
     private void createMenus() {
         JMenuBar menuBar = new JMenuBar();
 
-        JMenu fileMenu = new JMenu("File");
+        JMenu fileMenu = new LocalizedMenu("file", flp);
         menuBar.add(fileMenu);
 
-        JMenuItem newDocument = new JMenuItem("New");
+        JMenuItem newDocument = new LocalizedMenuItem("new", flp);
         newDocument.addActionListener(e -> handleNew());
         fileMenu.add(newDocument);
 
-        JMenuItem openDocument = new JMenuItem("Open");
+        JMenuItem openDocument = new LocalizedMenuItem("open", flp);
         openDocument.addActionListener(e -> handleOpen());
         fileMenu.add(openDocument);
 
-        JMenuItem saveDocument = new JMenuItem("Save");
+        JMenuItem saveDocument = new LocalizedMenuItem("save", flp);
         saveDocument.addActionListener(e -> handleSave());
         fileMenu.add(saveDocument);
 
-        JMenuItem saveAsDocument = new JMenuItem("Save As...");
+        JMenuItem saveAsDocument = new LocalizedMenuItem("saveas", flp);
         saveAsDocument.addActionListener(e -> handleSaveAs());
         fileMenu.add(saveAsDocument);
 
-        JMenuItem statistics = new JMenuItem("Statistics");
+        JMenuItem statistics = new LocalizedMenuItem("statistics", flp);
         statistics.addActionListener(e -> handleStats());
         fileMenu.add(statistics);
 
-        JMenuItem closeDocument = new JMenuItem("Close");
+        JMenuItem closeDocument = new LocalizedMenuItem("close", flp);
         closeDocument.addActionListener(e -> handleClose());
         fileMenu.add(closeDocument);
 
-        JMenuItem exit = new JMenuItem("Exit");
+        JMenuItem exit = new LocalizedMenuItem("exit", flp);
         exit.addActionListener(e -> handleWindowClosing());
         fileMenu.add(exit);
 
-        JMenu editMenu = new JMenu("Edit");
+        JMenu editMenu = new LocalizedMenu("edit", flp);
         menuBar.add(editMenu);
 
-        JMenuItem cutText = new JMenuItem("Cut");
+        JMenuItem cutText = new LocalizedMenuItem("cut", flp);
         cutText.addActionListener(e -> handleCut());
         editMenu.add(cutText);
 
-        JMenuItem copyText = new JMenuItem("Copy");
+        JMenuItem copyText = new LocalizedMenuItem("copy", flp);
         copyText.addActionListener(e -> handleCopy());
         editMenu.add(copyText);
 
-        JMenuItem pasteText = new JMenuItem("Paste");
+        JMenuItem pasteText = new LocalizedMenuItem("paste", flp);
         pasteText.addActionListener(e -> handlePaste());
         editMenu.add(pasteText);
 
-        JMenu helpMenu = new JMenu("Help");
-        menuBar.add(helpMenu);
+        JMenu langMenu = new LocalizedMenu("languages", flp);
+        menuBar.add(langMenu);
+
+        JMenuItem hr = new JMenuItem("hr");
+        JMenuItem en = new JMenuItem("en");
+        JMenuItem de = new JMenuItem("de");
+
+        langMenu.add(hr);
+        langMenu.add(en);
+        langMenu.add(de);
+
+        hr.addActionListener(e -> LocalizationProvider.getInstance().setLanguage("hr"));
+        en.addActionListener(e -> LocalizationProvider.getInstance().setLanguage("en"));
+        de.addActionListener(e -> LocalizationProvider.getInstance().setLanguage("de"));
 
         setJMenuBar(menuBar);
     }
@@ -231,10 +252,13 @@ public class JNotepadPP extends JFrame {
             int numOfNonBlankChars = text.replaceAll("\\s+", "").length();
             int numOfLines = textArea.getLineCount();
 
+            String messagePattern = flp.getString("stats_message");
+            String formattedMessage = MessageFormat.format(messagePattern, numOfChars, numOfNonBlankChars, numOfLines);
+
             JOptionPane.showMessageDialog(
                     this,
-                    "Your document has " + numOfChars + " characters, " + numOfNonBlankChars + " non-blank characters and " + numOfLines + " lines.",
-                    "Statistics",
+                    formattedMessage,
+                    flp.getString("statistics"),
                     JOptionPane.INFORMATION_MESSAGE
             );
         	}
