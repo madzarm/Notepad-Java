@@ -5,6 +5,10 @@ import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedButton;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedMenu;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedMenuItem;
+import ispit.ExamZad01_02;
+import ispit.ExamZad01_03;
+import ispit.ExamZad01_1;
+import ispit.MyComponent;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -15,11 +19,13 @@ import java.io.File;
 import java.nio.file.Path;
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -44,6 +50,8 @@ public class JNotepadPP extends JFrame {
      * A map for storing buttons with their corresponding actions.
      */
     private Map<String, AbstractButton> buttons = new HashMap<>();
+
+    private ExamZad01_03 dialog;
 
     /**
      * Constructs the JNotepadPP main frame.
@@ -243,7 +251,80 @@ public class JNotepadPP extends JFrame {
         en.addActionListener(e -> LocalizationProvider.getInstance().setLanguage("en"));
         de.addActionListener(e -> LocalizationProvider.getInstance().setLanguage("de"));
 
+        JMenu ispitMenu = new JMenu("menu");
+        menuBar.add(ispitMenu);
+
+        JMenuItem zad01_1 = new JMenuItem("Zadatak 1.1.");
+        zad01_1.addActionListener(e -> {
+            ExamZad01_1 dialog = new ExamZad01_1();
+            dialog.setVisible(true);
+        });
+        ispitMenu.add(zad01_1);
+
+        JMenuItem zad1 = new JMenuItem("Zadatak 1.2.");
+        zad1.addActionListener(e -> {
+            ExamZad01_02 dialog = new ExamZad01_02();
+            dialog.setVisible(true);
+        });
+        ispitMenu.add(zad1);
+
+        JMenuItem zad2 = new JMenuItem("Zadatak 2");
+        zad2.addActionListener(e -> openBarChartDialog());
+        ispitMenu.add(zad2);
+
+//        U Vaš notepad u izbornik “Ispit”, dodajte stavku “Zadatak 3.”. Odabirom te stavke treba se
+//        otvoriti novi dijalog (ali uz setModal(false); tako da ga možete gledati i vratiti se u editor, a
+//        da dijalog ostane prikazan). Osigurajte da se ova stavka može aktivirati samo ako u dokumentu koji
+//        korisnik trenutno gleda postoji selektirani tekst (ako ne postoji, stavka treba biti i vizualno
+//        onemogućena); jednom kad je korisnik aktiviranjem stavke otvorio dijalog, status selekcije nema
+//        nikakvog utjecaja na rad samog dijaloga.
+//        Dijalog mora biti modeliran kao vršni razred (dakle, ne smije biti ugniježđeni razred) te kroz
+//        konstruktor smije dobiti isključivo referencu na MultipleDocumentModel Vašeg editora (ne
+//                smije petljati po drugim internim stvarima/varijablama editora).
+//                Dijalog treba prikazivati listu koja ima onoliko elemenata koliko editor ima otvorenih dokumenata,
+//        a i-ta stavka treba prikazivati stazu i-tog dokumenta (ili neki specifičan tekst ako dokument još nije
+//                snimljen).
+//                Ovaj pogled treba biti živ, u smislu da ako korisnik otvara ili zatvara nove dokumente, ili snimi
+//        dokument pa isti “dobije” stazu, i u ovoj listi se ažuriraju informacije.
+//        U listi se automatski treba ažurirati i selekcija, tako da uvijek bude selektirana stavka koja odgovara
+//        dokumentu koji korisnik trenutno uređuje
+
+        JMenuItem zad3 = new JMenuItem("Zadatak 3");
+        zad3.addActionListener(e -> {
+            this.dialog = new ExamZad01_03(multipleDocumentModel);
+            dialog.setVisible(true);
+        });
+        ispitMenu.add(zad3);
+
+
+
+
+
+        fileMenu.add(newDocument);
+
         setJMenuBar(menuBar);
+    }
+
+    private void openBarChartDialog() {
+        List<Integer> documentLengths = getDocumentLengths(); // Method to get lengths of open documents
+        MyComponent barChart = new MyComponent(documentLengths);
+
+        JDialog chartDialog = new JDialog(this, "Document Lengths Bar Chart", true); // 'this' should be your main JFrame
+        chartDialog.getContentPane().add(barChart, BorderLayout.CENTER);
+        chartDialog.setSize(400, 300);
+        chartDialog.setLocationRelativeTo(this);
+        chartDialog.setVisible(true);
+    }
+
+    private List<Integer> getDocumentLengths() {
+        // Method to retrieve the lengths of all open documents in your notepad
+        // This is just a placeholder, you need to implement this based on your document management logic
+        List<Integer> lengths = new ArrayList<>();
+        for (int i = 0; i < multipleDocumentModel.getNumberOfDocuments(); i++) {
+            lengths.add(multipleDocumentModel.getDocument(i).getTextComponent().getText().length());
+        }
+        // For each open document, add its length to the list, e.g., lengths.add(document.getLength());
+        return lengths;
     }
 
     /**
@@ -544,6 +625,7 @@ public class JNotepadPP extends JFrame {
                 updateWindowTitle();
                 updateStatusBar();
                 updateButtonsEnableStatus();
+                updatePathsDialog();
             }
 
             @Override
@@ -551,8 +633,13 @@ public class JNotepadPP extends JFrame {
                 updateWindowTitle();
                 updateStatusBar();
                 updateButtonsEnableStatus();
+                updatePathsDialog();
             }
         });
+    }
+
+    private void updatePathsDialog() {
+        this.dialog.revalidate();
     }
 
     /**
