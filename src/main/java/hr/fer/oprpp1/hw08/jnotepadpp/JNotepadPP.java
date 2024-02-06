@@ -5,10 +5,6 @@ import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizationProvider;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedButton;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedMenu;
 import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedMenuItem;
-import ispit.ExamZad01_02;
-import ispit.ExamZad01_03;
-import ispit.ExamZad01_1;
-import ispit.MyComponent;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -51,7 +47,6 @@ public class JNotepadPP extends JFrame {
      */
     private Map<String, AbstractButton> buttons = new HashMap<>();
 
-    private ExamZad01_03 dialog;
 
     /**
      * Constructs the JNotepadPP main frame.
@@ -254,49 +249,10 @@ public class JNotepadPP extends JFrame {
         JMenu ispitMenu = new JMenu("menu");
         menuBar.add(ispitMenu);
 
-        JMenuItem zad01_1 = new JMenuItem("Zadatak 1.1.");
-        zad01_1.addActionListener(e -> {
-            ExamZad01_1 dialog = new ExamZad01_1();
-            dialog.setVisible(true);
-        });
-        ispitMenu.add(zad01_1);
-
-        JMenuItem zad1 = new JMenuItem("Zadatak 1.2.");
-        zad1.addActionListener(e -> {
-            ExamZad01_02 dialog = new ExamZad01_02();
-            dialog.setVisible(true);
-        });
-        ispitMenu.add(zad1);
-
-        JMenuItem zad2 = new JMenuItem("Zadatak 2");
-        zad2.addActionListener(e -> openBarChartDialog());
-        ispitMenu.add(zad2);
-
-        JMenuItem zad3 = new JMenuItem("Zadatak 3");
-        zad3.addActionListener(e -> {
-            this.dialog = new ExamZad01_03(multipleDocumentModel);
-            dialog.setVisible(true);
-        });
-        ispitMenu.add(zad3);
-
-
-
-
 
         fileMenu.add(newDocument);
 
         setJMenuBar(menuBar);
-    }
-
-    private void openBarChartDialog() {
-        List<Integer> documentLengths = getDocumentLengths();
-        MyComponent barChart = new MyComponent(documentLengths);
-
-        JDialog chartDialog = new JDialog(this, "Document Lengths Bar Chart", true);
-        chartDialog.getContentPane().add(barChart, BorderLayout.CENTER);
-        chartDialog.setSize(400, 300);
-        chartDialog.setLocationRelativeTo(this);
-        chartDialog.setVisible(true);
     }
 
     private List<Integer> getDocumentLengths() {
@@ -605,7 +561,6 @@ public class JNotepadPP extends JFrame {
                 updateWindowTitle();
                 updateStatusBar();
                 updateButtonsEnableStatus();
-                updatePathsDialog();
             }
 
             @Override
@@ -613,14 +568,10 @@ public class JNotepadPP extends JFrame {
                 updateWindowTitle();
                 updateStatusBar();
                 updateButtonsEnableStatus();
-                updatePathsDialog();
             }
         });
     }
 
-    private void updatePathsDialog() {
-        this.dialog.revalidate();
-    }
 
     /**
      * Updates the enable status of buttons based on the current state.
