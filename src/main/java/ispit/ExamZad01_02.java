@@ -17,12 +17,10 @@ public class ExamZad01_02 extends JDialog {
         Container cp = getContentPane();
         cp.setLayout(new BorderLayout());
 
-        // Initialize the layout manager with a default percentage
         exlm = new ExamLayoutManager(20);
 
-        // Panel to hold the slider
         JPanel topPanel = new JPanel();
-        JSlider slider = new JSlider(10, 90, 20); // Slider from 10 to 90, starting at 20
+        JSlider slider = new JSlider(10, 90, 20);
         slider.setMajorTickSpacing(10);
         slider.setPaintTicks(true);
         slider.setPaintLabels(true);

@@ -272,23 +272,6 @@ public class JNotepadPP extends JFrame {
         zad2.addActionListener(e -> openBarChartDialog());
         ispitMenu.add(zad2);
 
-//        U Vaš notepad u izbornik “Ispit”, dodajte stavku “Zadatak 3.”. Odabirom te stavke treba se
-//        otvoriti novi dijalog (ali uz setModal(false); tako da ga možete gledati i vratiti se u editor, a
-//        da dijalog ostane prikazan). Osigurajte da se ova stavka može aktivirati samo ako u dokumentu koji
-//        korisnik trenutno gleda postoji selektirani tekst (ako ne postoji, stavka treba biti i vizualno
-//        onemogućena); jednom kad je korisnik aktiviranjem stavke otvorio dijalog, status selekcije nema
-//        nikakvog utjecaja na rad samog dijaloga.
-//        Dijalog mora biti modeliran kao vršni razred (dakle, ne smije biti ugniježđeni razred) te kroz
-//        konstruktor smije dobiti isključivo referencu na MultipleDocumentModel Vašeg editora (ne
-//                smije petljati po drugim internim stvarima/varijablama editora).
-//                Dijalog treba prikazivati listu koja ima onoliko elemenata koliko editor ima otvorenih dokumenata,
-//        a i-ta stavka treba prikazivati stazu i-tog dokumenta (ili neki specifičan tekst ako dokument još nije
-//                snimljen).
-//                Ovaj pogled treba biti živ, u smislu da ako korisnik otvara ili zatvara nove dokumente, ili snimi
-//        dokument pa isti “dobije” stazu, i u ovoj listi se ažuriraju informacije.
-//        U listi se automatski treba ažurirati i selekcija, tako da uvijek bude selektirana stavka koja odgovara
-//        dokumentu koji korisnik trenutno uređuje
-
         JMenuItem zad3 = new JMenuItem("Zadatak 3");
         zad3.addActionListener(e -> {
             this.dialog = new ExamZad01_03(multipleDocumentModel);
@@ -306,10 +289,10 @@ public class JNotepadPP extends JFrame {
     }
 
     private void openBarChartDialog() {
-        List<Integer> documentLengths = getDocumentLengths(); // Method to get lengths of open documents
+        List<Integer> documentLengths = getDocumentLengths();
         MyComponent barChart = new MyComponent(documentLengths);
 
-        JDialog chartDialog = new JDialog(this, "Document Lengths Bar Chart", true); // 'this' should be your main JFrame
+        JDialog chartDialog = new JDialog(this, "Document Lengths Bar Chart", true);
         chartDialog.getContentPane().add(barChart, BorderLayout.CENTER);
         chartDialog.setSize(400, 300);
         chartDialog.setLocationRelativeTo(this);
@@ -317,13 +300,10 @@ public class JNotepadPP extends JFrame {
     }
 
     private List<Integer> getDocumentLengths() {
-        // Method to retrieve the lengths of all open documents in your notepad
-        // This is just a placeholder, you need to implement this based on your document management logic
         List<Integer> lengths = new ArrayList<>();
         for (int i = 0; i < multipleDocumentModel.getNumberOfDocuments(); i++) {
             lengths.add(multipleDocumentModel.getDocument(i).getTextComponent().getText().length());
         }
-        // For each open document, add its length to the list, e.g., lengths.add(document.getLength());
         return lengths;
     }
 

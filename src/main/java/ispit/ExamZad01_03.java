@@ -32,27 +32,25 @@ public class ExamZad01_03 extends JDialog {
         model.addMultipleDocumentListener(new MultipleDocumentListener() {
             @Override
             public void currentDocumentChanged(SingleDocumentModel previousModel, SingleDocumentModel currentModel) {
-                // Handle the change of current document if needed
             }
 
             @Override
             public void documentAdded(SingleDocumentModel model) {
-                updateListModel(); // Update list model when a document is added
+                updateListModel();
             }
 
             @Override
             public void documentRemoved(SingleDocumentModel model) {
-                updateListModel(); // Update list model when a document is removed
+                updateListModel();
             }
         });
     }
 
     private void updateListModel() {
-        listModel.clear(); // Clear the existing elements
+        listModel.clear();
         for (int i = 0; i < this.model.getNumberOfDocuments(); i++) {
-            // Use your existing method to get the path or placeholder text
             String path = getElementAt(i);
-            listModel.addElement(path); // Add the path to the list model
+            listModel.addElement(path);
         }
     }
 

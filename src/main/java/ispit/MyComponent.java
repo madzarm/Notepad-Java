@@ -17,7 +17,7 @@ public class MyComponent extends JComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        if (sum == 0) return; // If the sum is zero, do not draw bars.
+        if (sum == 0) return;
 
         int width = getWidth();
         int height = getHeight();
@@ -28,7 +28,6 @@ public class MyComponent extends JComponent {
             int x = i * barWidth;
             int y = height - barHeight;
 
-            // Alternate colors between green and red
             g.setColor(i % 2 == 0 ? Color.GREEN : Color.RED);
             g.fillRect(x, y, barWidth, barHeight);
         }
@@ -36,6 +35,6 @@ public class MyComponent extends JComponent {
 
     @Override
     public Dimension getPreferredSize() {
-        return new Dimension(numbers.size() * 100, 300); // Preferred size of the component
+        return new Dimension(numbers.size() * 100, 300);
     }
 }
