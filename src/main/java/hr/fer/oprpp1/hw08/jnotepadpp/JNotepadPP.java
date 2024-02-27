@@ -9,6 +9,7 @@ import hr.fer.oprpp1.hw08.jnotepadpp.local.LocalizedMenuItem;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -46,6 +47,7 @@ public class JNotepadPP extends JFrame {
      * A map for storing buttons with their corresponding actions.
      */
     private Map<String, AbstractButton> buttons = new HashMap<>();
+    private JToolBar toolBar;
 
 
     /**
@@ -88,49 +90,25 @@ public class JNotepadPP extends JFrame {
      * Creates and initializes the toolbar.
      */
     private void createToolbar() {
-        JToolBar toolBar = new JToolBar();
-
-        JButton newButton = new LocalizedButton("new", flp);
-        newButton.addActionListener(e -> handleNew());
-        toolBar.add(newButton);
-
-        JButton openButton = new LocalizedButton("open", flp);
-        openButton.addActionListener(e -> handleOpen());
-        toolBar.add(openButton);
-
-        JButton saveButton = new LocalizedButton("save", flp);
-        saveButton.addActionListener(e -> handleSave());
-        toolBar.add(saveButton);
-
-        JButton saveAsButton = new LocalizedButton("save_as", flp);
-        saveAsButton.addActionListener(e -> handleSaveAs());
-        toolBar.add(saveAsButton);
-
-        JButton cutButton = new LocalizedButton("cut", flp);
-        cutButton.addActionListener(e -> handleCut());
-        toolBar.add(cutButton);
-
-        JButton copyButton = new LocalizedButton("copy", flp);
-        copyButton.addActionListener(e -> handleCopy());
-        toolBar.add(copyButton);
-
-        JButton pasteButton = new LocalizedButton("paste", flp);
-        pasteButton.addActionListener(e -> handlePaste());
-        toolBar.add(pasteButton);
-
-        JButton statsButton = new LocalizedButton("statistics", flp);
-        statsButton.addActionListener(e -> handleStats());
-        toolBar.add(statsButton);
-
-        JButton closeButton = new LocalizedButton("close", flp);
-        closeButton.addActionListener(e -> handleClose());
-        toolBar.add(closeButton);
-
-        JButton exitButton = new LocalizedButton("exit", flp);
-        exitButton.addActionListener(e -> handleWindowClosing());
-        toolBar.add(exitButton);
+        toolBar = new JToolBar();
+        addToolButton("new", e -> handleNew());
+        addToolButton("open", e -> handleOpen());
+        addToolButton("save", e -> handleSave());
+        addToolButton("save_as", e -> handleSaveAs());
+        addToolButton("cut", e -> handleCut());
+        addToolButton("copy", e -> handleCopy());
+        addToolButton("paste", e -> handlePaste());
+        addToolButton("statistics", e -> handleStats());
+        addToolButton("close", e -> handleClose());
+        addToolButton("exit", e -> handleWindowClosing());
 
         add(toolBar, BorderLayout.NORTH);
+    }
+
+    private void addToolButton(String actionCommand, ActionListener actionListener) {
+        JButton button = new LocalizedButton(actionCommand, flp);
+        button.addActionListener(actionListener);
+        toolBar.add(button);
     }
 
 
