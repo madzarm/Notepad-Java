@@ -233,14 +233,6 @@ public class JNotepadPP extends JFrame {
         setJMenuBar(menuBar);
     }
 
-    private List<Integer> getDocumentLengths() {
-        List<Integer> lengths = new ArrayList<>();
-        for (int i = 0; i < multipleDocumentModel.getNumberOfDocuments(); i++) {
-            lengths.add(multipleDocumentModel.getDocument(i).getTextComponent().getText().length());
-        }
-        return lengths;
-    }
-
     /**
      * Handles the 'unique' action.
      */
